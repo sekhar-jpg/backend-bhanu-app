@@ -14,13 +14,11 @@ app.use(bodyParser.json());
 
 // Load Routes
 const caseRoutes = require('./routes/caseRoutes');
-const followUpRoutes = require('./routes/followUpRoutes');
 
 // Use Routes
 app.use('/api/cases', caseRoutes);
-app.use('/api/followups', followUpRoutes);
 
-// MongoDB Connection using MONGO_URI from environment
+// MongoDB Connection
 const mongoURI = process.env.MONGO_URI;
 mongoose.connect(mongoURI, {
   useNewUrlParser: true,

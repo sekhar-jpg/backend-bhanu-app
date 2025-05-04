@@ -16,7 +16,8 @@ app.use(bodyParser.json());
 const caseRoutes = require('./routes/caseRoutes');
 
 // Use Routes
-app.use('/api/cases', caseRoutes);
+app.use('/api/cases', caseRoutes); // This handles POST and GET routes for cases
+// Add follow-up route separately if it's needed as part of another logic or structure
 
 // MongoDB Connection
 const mongoURI = process.env.MONGO_URI;

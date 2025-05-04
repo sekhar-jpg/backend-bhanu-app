@@ -1,26 +1,34 @@
 const express = require('express');
 const mongoose = require('mongoose');
+const cors = require('cors');
+const dotenv = require('dotenv');
 const bodyParser = require('body-parser');
-const followUpRoutes = require('./routes/followUpRoutes');  // Import routes
+
+dotenv.config();
 
 const app = express();
+const port = process.env.PORT || 10000;
 
-// Middleware
-app.use(bodyParser.json());  // To parse incoming JSON data
+app.use(cors());
+app.use(bodyParser.json());
 
-// MongoDB Connection
-mongoose.connect('mongodb+srv://<username>:<password>@cluster0.wm2pxqs.mongodb.net/homeopathy?retryWrites=true&w=majority', {
+// Load Routes
+const caseRoutes = require('./routes/caseRoutes');
+const followUpRoutes = require('./routes/followUpRoutes');
+
+// Use Routes
+app.use('/api/cases', caseRoutes);
+app.use('/api/followups', followUpRoutes);
+
+// MongoDB Connection using MONGO_URI from environment
+const mongoURI = process.env.MONGO_URI;
+mongoose.connect(mongoURI, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 })
-  .then(() => console.log('MongoDB connected'))
-  .catch((err) => console.log(err));
+.then(() => console.log('✅ Connected to MongoDB'))
+.catch((err) => console.error('❌ MongoDB connection error:', err.message));
 
-// Routes
-app.use('/api', followUpRoutes);  // Use the follow-up routes for `/api`
-
-// Start the server
-const port = process.env.PORT || 5000;
 app.listen(port, () => {
-  console.log(`Server running on port ${port}`);
+  console.log(`🚀 Server running on port ${port}`);
 });

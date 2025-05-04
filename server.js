@@ -1,30 +1,26 @@
 const express = require('express');
 const mongoose = require('mongoose');
-const cors = require('cors');
-const caseRoutes = require('./routes/caseRoutes');
-const dotenv = require('dotenv');
-
-dotenv.config();  // Load environment variables
+const bodyParser = require('body-parser');
+const followUpRoutes = require('./routes/followUpRoutes');  // Import routes
 
 const app = express();
-const port = process.env.PORT || 10000;
 
-// Middleware for JSON requests
-app.use(express.json());
-app.use(cors());
+// Middleware
+app.use(bodyParser.json());  // To parse incoming JSON data
 
-// MongoDB connection
-mongoose.connect(process.env.MONGO_URI, {
+// MongoDB Connection
+mongoose.connect('mongodb+srv://<username>:<password>@cluster0.wm2pxqs.mongodb.net/homeopathy?retryWrites=true&w=majority', {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 })
-.then(() => console.log('MongoDB Connected'))
-.catch((err) => console.log('MongoDB Connection Error:', err));
+  .then(() => console.log('MongoDB connected'))
+  .catch((err) => console.log(err));
 
-// Routes for API endpoints
-app.use('/api/cases', caseRoutes);
+// Routes
+app.use('/api', followUpRoutes);  // Use the follow-up routes for `/api`
 
 // Start the server
+const port = process.env.PORT || 5000;
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
 });

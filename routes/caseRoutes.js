@@ -61,3 +61,21 @@ router.delete('/:id', async (req, res) => {
     res.status(500).json({ message: 'Internal Server Error', error: err.message });
   }
 });
+// Update a case by ID
+router.put('/:id', async (req, res) => {
+  try {
+    const updatedCase = await Case.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+      runValidators: true,
+    });
+
+    if (!updatedCase) {
+      return res.status(404).json({ message: 'Case not found' });
+    }
+
+    res.json({ message: 'Case updated successfully', data: updatedCase });
+  } catch (err) {
+    console.error('❌ Error updating case:', err);
+    res.status(500).json({ message: 'Internal Server Error', error: err.message });
+  }
+});

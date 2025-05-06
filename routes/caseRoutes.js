@@ -2,87 +2,7 @@ const express = require('express');
 const router = express.Router();
 const Case = require('../models/Case');
 
-// Create a new case
-router.post('/', async (req, res) => {
-  try {
-    const { patientName, phoneNumber, symptoms, remedyGiven, followUpDate } = req.body;
-
-    if (!patientName || !phoneNumber || !symptoms) {
-      return res.status(400).json({ message: 'Missing required fields' });
-    }
-
-    const newCase = new Case({ patientName, phoneNumber, symptoms, remedyGiven, followUpDate });
-    await newCase.save();
-    res.status(201).json({ message: 'Case saved successfully', data: newCase });
-  } catch (err) {
-    console.error('❌ Error saving case:', err);
-    res.status(500).json({ message: 'Internal Server Error', error: err.message });
-  }
-});
-
-// Get all cases
-router.get('/', async (req, res) => {
-  try {
-    const cases = await Case.find().sort({ createdAt: -1 });
-    res.status(200).json(cases);
-  } catch (err) {
-    console.error('❌ Error fetching cases:', err);
-    res.status(500).json({ message: 'Internal Server Error', error: err.message });
-  }
-});
-
-// Delete a case by ID
-router.delete('/:id', async (req, res) => {
-  try {
-    const deletedCase = await Case.findByIdAndDelete(req.params.id);
-    if (!deletedCase) {
-      return res.status(404).json({ message: 'Case not found' });
-    }
-    res.status(200).json({ message: 'Case deleted successfully' });
-  } catch (err) {
-    console.error('❌ Error deleting case:', err);
-    res.status(500).json({ message: 'Internal Server Error', error: err.message });
-  }
-});
-
-// Update a case by ID
-router.put('/:id', async (req, res) => {
-  try {
-    const updatedCase = await Case.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-      runValidators: true,
-    });
-
-    if (!updatedCase) {
-      return res.status(404).json({ message: 'Case not found' });
-    }
-
-    res.json({ message: 'Case updated successfully', data: updatedCase });
-  } catch (err) {
-    console.error('❌ Error updating case:', err);
-    res.status(500).json({ message: 'Internal Server Error', error: err.message });
-  }
-});
-
-// Add follow-up to a case
-router.post('/:id/followups', async (req, res) => {
-  try {
-    const { date, notes } = req.body;
-
-    const updatedCase = await Case.findByIdAndUpdate(
-      req.params.id,
-      { $push: { followUps: { date, notes } } },
-      { new: true }
-    );
-
-    res.status(200).json(updatedCase);
-  } catch (error) {
-    console.error('❌ Error adding follow-up:', error);
-    res.status(500).json({ message: 'Error adding follow-up', error: error.message });
-  }
-});
-
-// Get today's follow-up reminders
+// ✅ Get today's follow-up reminders (must be at top)
 router.get('/followups/today', async (req, res) => {
   try {
     const today = new Date();
@@ -101,6 +21,86 @@ router.get('/followups/today', async (req, res) => {
   } catch (error) {
     console.error('❌ Error fetching today\'s follow-ups:', error);
     res.status(500).json({ message: 'Error fetching today\'s follow-ups', error: error.message });
+  }
+});
+
+// ✅ Create a new case
+router.post('/', async (req, res) => {
+  try {
+    const { patientName, phoneNumber, symptoms, remedyGiven, followUpDate } = req.body;
+
+    if (!patientName || !phoneNumber || !symptoms) {
+      return res.status(400).json({ message: 'Missing required fields' });
+    }
+
+    const newCase = new Case({ patientName, phoneNumber, symptoms, remedyGiven, followUpDate });
+    await newCase.save();
+    res.status(201).json({ message: 'Case saved successfully', data: newCase });
+  } catch (err) {
+    console.error('❌ Error saving case:', err);
+    res.status(500).json({ message: 'Internal Server Error', error: err.message });
+  }
+});
+
+// ✅ Get all cases
+router.get('/', async (req, res) => {
+  try {
+    const cases = await Case.find().sort({ createdAt: -1 });
+    res.status(200).json(cases);
+  } catch (err) {
+    console.error('❌ Error fetching cases:', err);
+    res.status(500).json({ message: 'Internal Server Error', error: err.message });
+  }
+});
+
+// ✅ Delete a case by ID
+router.delete('/:id', async (req, res) => {
+  try {
+    const deletedCase = await Case.findByIdAndDelete(req.params.id);
+    if (!deletedCase) {
+      return res.status(404).json({ message: 'Case not found' });
+    }
+    res.status(200).json({ message: 'Case deleted successfully' });
+  } catch (err) {
+    console.error('❌ Error deleting case:', err);
+    res.status(500).json({ message: 'Internal Server Error', error: err.message });
+  }
+});
+
+// ✅ Update a case by ID
+router.put('/:id', async (req, res) => {
+  try {
+    const updatedCase = await Case.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+      runValidators: true,
+    });
+
+    if (!updatedCase) {
+      return res.status(404).json({ message: 'Case not found' });
+    }
+
+    res.json({ message: 'Case updated successfully', data: updatedCase });
+  } catch (err) {
+    console.error('❌ Error updating case:', err);
+    res.status(500).json({ message: 'Internal Server Error', error: err.message });
+  }
+});
+
+// ✅ Add follow-up to a case
+router.post('/:id/followups', async (req, res) => {
+  try {
+    const { date, notes } = req.body;
+
+    const updatedCase = await Case.findByIdAndUpdate(
+      req.params.id,
+      { $push: { followUps: { date, notes } } },
+      { new: true }
+    );
+
+    res.status(200).json(updatedCase);
+  } catch (error) {
+    console.error('❌ Error adding follow-up:', error);
+    res.status(500).json({ message: 'Error adding follow-up', error: error.message });
   }
 });
 

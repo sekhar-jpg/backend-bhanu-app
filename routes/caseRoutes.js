@@ -1,32 +1,17 @@
 const express = require('express');
 const router = express.Router();
-const Case = require('../models/Case'); // Assuming model file is models/Case.js
+const Case = require('../models/Case');
 
-// Create a new case (POST)
+// Create a new case
 router.post('/', async (req, res) => {
   try {
-    const {
-      patientName,
-      phoneNumber,
-      symptoms,
-      remedyGiven,
-      followUpDate,
-    } = req.body;
+    const { patientName, phoneNumber, symptoms, remedyGiven, followUpDate } = req.body;
 
-    // Validate required fields
     if (!patientName || !phoneNumber || !symptoms) {
       return res.status(400).json({ message: 'Missing required fields' });
     }
 
-    // Create and save the case
-    const newCase = new Case({
-      patientName,
-      phoneNumber,
-      symptoms,
-      remedyGiven,
-      followUpDate,
-    });
-
+    const newCase = new Case({ patientName, phoneNumber, symptoms, remedyGiven, followUpDate });
     await newCase.save();
     res.status(201).json({ message: 'Case saved successfully', data: newCase });
   } catch (err) {
@@ -35,7 +20,7 @@ router.post('/', async (req, res) => {
   }
 });
 
-// Get all cases (GET)
+// Get all cases
 router.get('/', async (req, res) => {
   try {
     const cases = await Case.find().sort({ createdAt: -1 });
@@ -46,12 +31,10 @@ router.get('/', async (req, res) => {
   }
 });
 
-module.exports = router;
-// Delete a case by ID (DELETE)
+// Delete a case by ID
 router.delete('/:id', async (req, res) => {
   try {
-    const caseId = req.params.id;
-    const deletedCase = await Case.findByIdAndDelete(caseId);
+    const deletedCase = await Case.findByIdAndDelete(req.params.id);
     if (!deletedCase) {
       return res.status(404).json({ message: 'Case not found' });
     }
@@ -61,6 +44,7 @@ router.delete('/:id', async (req, res) => {
     res.status(500).json({ message: 'Internal Server Error', error: err.message });
   }
 });
+
 // Update a case by ID
 router.put('/:id', async (req, res) => {
   try {
@@ -79,23 +63,25 @@ router.put('/:id', async (req, res) => {
     res.status(500).json({ message: 'Internal Server Error', error: err.message });
   }
 });
+
 // Add follow-up to a case
 router.post('/:id/followups', async (req, res) => {
   try {
-    const caseId = req.params.id;
     const { date, notes } = req.body;
 
     const updatedCase = await Case.findByIdAndUpdate(
-      caseId,
+      req.params.id,
       { $push: { followUps: { date, notes } } },
       { new: true }
     );
 
     res.status(200).json(updatedCase);
   } catch (error) {
+    console.error('❌ Error adding follow-up:', error);
     res.status(500).json({ message: 'Error adding follow-up', error: error.message });
   }
 });
+
 // Get today's follow-up reminders
 router.get('/followups/today', async (req, res) => {
   try {
@@ -113,7 +99,9 @@ router.get('/followups/today', async (req, res) => {
 
     res.status(200).json(casesWithTodayFollowups);
   } catch (error) {
+    console.error('❌ Error fetching today\'s follow-ups:', error);
     res.status(500).json({ message: 'Error fetching today\'s follow-ups', error: error.message });
   }
 });
 
+module.exports = router;

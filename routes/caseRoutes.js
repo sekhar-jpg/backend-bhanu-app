@@ -47,3 +47,17 @@ router.get('/', async (req, res) => {
 });
 
 module.exports = router;
+// Delete a case by ID (DELETE)
+router.delete('/:id', async (req, res) => {
+  try {
+    const caseId = req.params.id;
+    const deletedCase = await Case.findByIdAndDelete(caseId);
+    if (!deletedCase) {
+      return res.status(404).json({ message: 'Case not found' });
+    }
+    res.status(200).json({ message: 'Case deleted successfully' });
+  } catch (err) {
+    console.error('❌ Error deleting case:', err);
+    res.status(500).json({ message: 'Internal Server Error', error: err.message });
+  }
+});

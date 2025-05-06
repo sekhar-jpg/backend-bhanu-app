@@ -27,3 +27,24 @@ const caseSchema = new mongoose.Schema({
 });
 
 module.exports = mongoose.model('Case', caseSchema);
+const mongoose = require('mongoose');
+
+const followUpSchema = new mongoose.Schema({
+  date: Date,
+  notes: String
+});
+
+const caseSchema = new mongoose.Schema({
+  patientName: String,
+  phoneNumber: String,
+  symptoms: String,
+  mentalSymptoms: String,
+  remedyGiven: String,
+  visitDate: Date,
+  followUps: [followUpSchema], // Array of follow-up objects
+}, {
+  timestamps: true
+});
+
+module.exports = mongoose.model('Case', caseSchema);
+

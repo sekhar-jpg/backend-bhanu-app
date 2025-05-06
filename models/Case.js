@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 
+// Follow-Up Schema embedded within Case Schema
 const followUpSchema = new mongoose.Schema({
   date: Date,
   notes: String
@@ -14,7 +15,7 @@ const caseSchema = new mongoose.Schema({
   },
   symptoms: String,
   mentalSymptoms: String,
-  followUps: [followUpSchema]
+  followUps: [followUpSchema]  // Array to support multiple follow-ups
 });
 
 module.exports = mongoose.model('Case', caseSchema);

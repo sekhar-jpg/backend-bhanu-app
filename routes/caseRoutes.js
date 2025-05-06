@@ -96,4 +96,24 @@ router.post('/:id/followups', async (req, res) => {
     res.status(500).json({ message: 'Error adding follow-up', error: error.message });
   }
 });
+// Get today's follow-up reminders
+router.get('/followups/today', async (req, res) => {
+  try {
+    const today = new Date();
+    const start = new Date(today.setHours(0, 0, 0, 0));
+    const end = new Date(today.setHours(23, 59, 59, 999));
+
+    const casesWithTodayFollowups = await Case.find({
+      followUps: {
+        $elemMatch: {
+          date: { $gte: start, $lte: end }
+        }
+      }
+    });
+
+    res.status(200).json(casesWithTodayFollowups);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching today\'s follow-ups', error: error.message });
+  }
+});
 

@@ -79,3 +79,21 @@ router.put('/:id', async (req, res) => {
     res.status(500).json({ message: 'Internal Server Error', error: err.message });
   }
 });
+// Add follow-up to a case
+router.post('/:id/followups', async (req, res) => {
+  try {
+    const caseId = req.params.id;
+    const { date, notes } = req.body;
+
+    const updatedCase = await Case.findByIdAndUpdate(
+      caseId,
+      { $push: { followUps: { date, notes } } },
+      { new: true }
+    );
+
+    res.status(200).json(updatedCase);
+  } catch (error) {
+    res.status(500).json({ message: 'Error adding follow-up', error: error.message });
+  }
+});
+

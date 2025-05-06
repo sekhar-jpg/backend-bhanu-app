@@ -1,27 +1,48 @@
-// routes/caseRoutes.js
 const express = require('express');
 const router = express.Router();
-const Case = require('../models/Case');
+const Case = require('../models/Case'); // Assuming model file is models/Case.js
 
-// POST: Add a new case
-router.post('/add', async (req, res) => {
+// Create a new case (POST)
+router.post('/', async (req, res) => {
   try {
-    const newCase = new Case(req.body);
+    const {
+      patientName,
+      phoneNumber,
+      symptoms,
+      remedyGiven,
+      followUpDate,
+    } = req.body;
+
+    // Validate required fields
+    if (!patientName || !phoneNumber || !symptoms) {
+      return res.status(400).json({ message: 'Missing required fields' });
+    }
+
+    // Create and save the case
+    const newCase = new Case({
+      patientName,
+      phoneNumber,
+      symptoms,
+      remedyGiven,
+      followUpDate,
+    });
+
     await newCase.save();
-    res.status(200).json({ success: true, message: 'Case added successfully' });
-  } catch (error) {
-    console.error('Error adding case:', error.message);
-    res.status(500).json({ success: false, message: 'Server Error: Unable to add case' });
+    res.status(201).json({ message: 'Case saved successfully', data: newCase });
+  } catch (err) {
+    console.error('❌ Error saving case:', err);
+    res.status(500).json({ message: 'Internal Server Error', error: err.message });
   }
 });
 
-// GET: Get all cases
+// Get all cases (GET)
 router.get('/', async (req, res) => {
   try {
-    const cases = await Case.find();
+    const cases = await Case.find().sort({ createdAt: -1 });
     res.status(200).json(cases);
-  } catch (error) {
-    res.status(500).json({ message: 'Error fetching cases' });
+  } catch (err) {
+    console.error('❌ Error fetching cases:', err);
+    res.status(500).json({ message: 'Internal Server Error', error: err.message });
   }
 });
 

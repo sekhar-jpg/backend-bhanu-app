@@ -103,5 +103,19 @@ router.post('/:id/followups', async (req, res) => {
     res.status(500).json({ message: 'Error adding follow-up', error: error.message });
   }
 });
+// ✅ Get a single case by ID (required for EditCaseForm)
+router.get('/:id', async (req, res) => {
+  try {
+    const caseData = await Case.findById(req.params.id);
+    if (!caseData) {
+      return res.status(404).json({ message: 'Case not found' });
+    }
+    res.status(200).json(caseData);
+  } catch (err) {
+    console.error('❌ Error fetching case by ID:', err);
+    res.status(500).json({ message: 'Internal Server Error', error: err.message });
+  }
+});
+
 
 module.exports = router;

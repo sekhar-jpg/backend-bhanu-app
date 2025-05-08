@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const dotenv = require('dotenv');
 const bodyParser = require('body-parser');
+const path = require('path');  // Import path module
 
 dotenv.config();
 
@@ -24,6 +25,14 @@ mongoose.connect(mongoURI, {
 })
 .then(() => console.log('✅ Connected to MongoDB'))
 .catch((err) => console.error('❌ MongoDB connection error:', err.message));
+
+// Serve static files from React build folder
+app.use(express.static(path.join(__dirname, 'client/build')));
+
+// Serve index.html for any route not handled by the API
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'client/build', 'index.html'));
+});
 
 app.listen(port, () => {
   console.log(`🚀 Server running on port ${port}`);

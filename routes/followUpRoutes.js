@@ -1,18 +1,14 @@
-// routes/followUpRoutes.js
-
 const express = require('express');
 const router = express.Router();
-const FollowUp = require('../models/FollowUp');
+const followUpController = require('../controllers/followUpController');
 
-// Update a follow-up by ID
-router.put('/:id', async (req, res) => {
-  try {
-    const updatedFollowUp = await FollowUp.findByIdAndUpdate(req.params.id, req.body, { new: true });
-    if (!updatedFollowUp) return res.status(404).json({ message: 'Follow-up not found' });
-    res.json(updatedFollowUp);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-});
+// Add a new follow-up
+router.post('/', followUpController.addFollowUp);
+
+// Get today's follow-ups
+router.get('/today', followUpController.getTodaysFollowUps);
+
+// Delete a follow-up
+router.delete('/:id', followUpController.deleteFollowUp);
 
 module.exports = router;

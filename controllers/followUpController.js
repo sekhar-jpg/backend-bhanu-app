@@ -38,13 +38,18 @@ exports.getTodaysFollowUps = async (req, res) => {
     res.status(500).json({ message: 'Error fetching follow-ups' });
   }
 };
+const FollowUp = require('../models/FollowUp'); // Make sure this is at the top
+
 // Delete a follow-up
 exports.deleteFollowUp = async (req, res) => {
   try {
-    await FollowUp.findByIdAndDelete(req.params.id);
-    res.json({ success: true, message: 'Follow-up deleted' });
+    const followUp = await FollowUp.findByIdAndDelete(req.params.id);
+    if (!followUp) {
+      return res.status(404).json({ success: false, message: 'Follow-up not found' });
+    }
+    res.json({ success: true, message: 'Follow-up deleted successfully' });
   } catch (err) {
-    console.error(err);
+    console.error('Delete error:', err);
     res.status(500).json({ success: false, message: 'Failed to delete follow-up' });
   }
 };

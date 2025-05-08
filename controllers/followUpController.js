@@ -39,14 +39,15 @@ exports.getTodaysFollowUps = async (req, res) => {
     res.status(500).json({ success: false, message: 'Error fetching follow-ups' });
   }
 };
-
-// Delete a follow-up
 exports.deleteFollowUp = async (req, res) => {
   const { id } = req.params;
 
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return res.status(400).json({ success: false, message: 'Invalid follow-up ID format' });
+  }
+
   try {
-    const objectId = new mongoose.Types.ObjectId(id);
-    const followUp = await FollowUp.findByIdAndDelete(objectId);
+    const followUp = await FollowUp.findByIdAndDelete(id);
 
     if (!followUp) {
       return res.status(404).json({ success: false, message: 'Follow-up not found' });
@@ -58,3 +59,4 @@ exports.deleteFollowUp = async (req, res) => {
     res.status(500).json({ success: false, message: 'Failed to delete follow-up' });
   }
 };
+

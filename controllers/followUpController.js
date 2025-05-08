@@ -29,7 +29,7 @@ exports.getTodaysFollowUps = async (req, res) => {
 
   try {
     const followUps = await FollowUp.find({
-      date: { $gte: startOfDay, $lte: endOfDay }  // ✅ updated field from followUpDate to date
+      date: { $gte: startOfDay, $lte: endOfDay }
     }).populate('caseId'); // Optional: Populate case data if necessary
 
     res.json({ followUps });
@@ -38,7 +38,6 @@ exports.getTodaysFollowUps = async (req, res) => {
     res.status(500).json({ message: 'Error fetching follow-ups' });
   }
 };
-const FollowUp = require('../models/FollowUp'); // Make sure this is at the top
 
 // Delete a follow-up
 exports.deleteFollowUp = async (req, res) => {

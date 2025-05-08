@@ -31,12 +31,12 @@ exports.getTodaysFollowUps = async (req, res) => {
   try {
     const followUps = await FollowUp.find({
       date: { $gte: startOfDay, $lte: endOfDay }
-    }).populate('caseId'); // Populate case data if necessary
+    }).populate('caseId'); // Populate case data if needed
 
-    res.json({ followUps });
+    res.json({ success: true, followUps });
   } catch (err) {
-    console.error('Get Today\'s FollowUps Error:', err);
-    res.status(500).json({ message: 'Error fetching follow-ups' });
+    console.error("Get Today's FollowUps Error:", err);
+    res.status(500).json({ success: false, message: 'Error fetching follow-ups' });
   }
 };
 

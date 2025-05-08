@@ -12,11 +12,15 @@ const port = process.env.PORT || 10000;
 app.use(cors());
 app.use(bodyParser.json());
 
-// Routes
+// ✅ Route imports
 const caseRoutes = require('./routes/caseRoutes');
-app.use('/api/cases', caseRoutes);
+const followUpRoutes = require('./routes/followUpRoutes');
 
-// MongoDB Connection
+// ✅ Use routes
+app.use('/api/cases', caseRoutes);
+app.use('/api/followups', followUpRoutes);
+
+// ✅ MongoDB connection
 const mongoURI = process.env.MONGO_URI;
 mongoose.connect(mongoURI, {
   useNewUrlParser: true,

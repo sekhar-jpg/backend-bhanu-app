@@ -29,8 +29,8 @@ exports.getTodaysFollowUps = async (req, res) => {
 
   try {
     const followUps = await FollowUp.find({
-      date: { $gte: startOfDay, $lte: endOfDay }
-    }).populate('caseId');  // Optional: Populate case data if necessary
+      followUpDate: { $gte: startOfDay, $lte: endOfDay }
+    }).populate('caseId'); // Optional: Populate case data if necessary
 
     res.json({ followUps });
   } catch (err) {

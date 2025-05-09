@@ -2,7 +2,6 @@ const express = require('express');
 const router = express.Router();
 const Case = require('../models/Case');//
 
-// 
 // ✅ DUPLICATE CHECK ROUTE
 router.get("/check-duplicate", async (req, res) => {
   const { patientName, phoneNumber, visitDate } = req.query;

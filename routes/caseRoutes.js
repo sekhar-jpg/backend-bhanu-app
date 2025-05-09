@@ -1,8 +1,20 @@
 const express = require('express');
 const router = express.Router();
-const Case = require('../models/Case');
+const Case = require('../models/Case');//
 
-// ✅ 1. Get today's follow-up reminders
+// 
+// ✅ DUPLICATE CHECK ROUTE
+router.get("/check-duplicate", async (req, res) => {
+  const { patientName, phoneNumber, visitDate } = req.query;
+  try {
+    const existing = await Case.findOne({ patientName, phoneNumber, visitDate });
+    res.json({ exists: !!existing });
+  } catch (err) {
+    console.error("Error checking duplicate case:", err);
+    res.status(500).json({ error: "Server error while checking duplicate." });
+  }
+});
+//✅ 1. Get today's follow-up reminders
 router.get('/followups/today', async (req, res) => {
   try {
     const today = new Date();

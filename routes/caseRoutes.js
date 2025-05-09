@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const Case = require('../models/Case');
 
-// ✅ Get today's follow-up reminders (must be at top)
+// ✅ 1. Get today's follow-up reminders
 router.get('/followups/today', async (req, res) => {
   try {
     const today = new Date();
@@ -24,16 +24,33 @@ router.get('/followups/today', async (req, res) => {
   }
 });
 
-// ✅ Create a new case
+// ✅ 2. Create a new case
 router.post('/', async (req, res) => {
   try {
-    const { patientName, phoneNumber, symptoms, remedyGiven, followUpDate } = req.body;
+    const {
+      patientName,
+      phoneNumber,
+      symptoms,
+      mentalSymptoms,
+      remedyGiven,
+      followUpDate,
+      faceAnalysis
+    } = req.body;
 
     if (!patientName || !phoneNumber || !symptoms) {
       return res.status(400).json({ message: 'Missing required fields' });
     }
 
-    const newCase = new Case({ patientName, phoneNumber, symptoms, remedyGiven, followUpDate });
+    const newCase = new Case({
+      patientName,
+      phoneNumber,
+      symptoms,
+      mentalSymptoms,
+      remedyGiven,
+      followUpDate,
+      faceAnalysis
+    });
+
     await newCase.save();
     res.status(201).json({ message: 'Case saved successfully', data: newCase });
   } catch (err) {
@@ -42,10 +59,10 @@ router.post('/', async (req, res) => {
   }
 });
 
-// ✅ Get all cases
+// ✅ 3. Get all cases
 router.get('/', async (req, res) => {
   try {
-    const cases = await Case.find().sort({ createdAt: -1 });
+    const cases = await Case.find().sort({ visitDate: -1 });
     res.status(200).json(cases);
   } catch (err) {
     console.error('❌ Error fetching cases:', err);
@@ -53,7 +70,7 @@ router.get('/', async (req, res) => {
   }
 });
 
-// ✅ Delete a case by ID
+// ✅ 4. Delete a case by ID
 router.delete('/:id', async (req, res) => {
   try {
     const deletedCase = await Case.findByIdAndDelete(req.params.id);
@@ -67,7 +84,7 @@ router.delete('/:id', async (req, res) => {
   }
 });
 
-// ✅ Update a case by ID
+// ✅ 5. Update a case by ID
 router.put('/:id', async (req, res) => {
   try {
     const updatedCase = await Case.findByIdAndUpdate(req.params.id, req.body, {
@@ -86,7 +103,7 @@ router.put('/:id', async (req, res) => {
   }
 });
 
-// ✅ Add follow-up to a case
+// ✅ 6. Add a follow-up to a case
 router.post('/:id/followups', async (req, res) => {
   try {
     const { date, notes } = req.body;
@@ -103,7 +120,8 @@ router.post('/:id/followups', async (req, res) => {
     res.status(500).json({ message: 'Error adding follow-up', error: error.message });
   }
 });
-// ✅ Get a single case by ID (required for EditCaseForm)
+
+// ✅ 7. Get a single case by ID
 router.get('/:id', async (req, res) => {
   try {
     const caseData = await Case.findById(req.params.id);
@@ -116,6 +134,5 @@ router.get('/:id', async (req, res) => {
     res.status(500).json({ message: 'Internal Server Error', error: err.message });
   }
 });
-
 
 module.exports = router;

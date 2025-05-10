@@ -1,19 +1,20 @@
 const express = require('express');
 const router = express.Router();
-const Case = require('../models/Case');//
+const Case = require('../models/Case');
 
-// ✅ DUPLICATE CHECK ROUTE
+// ✅ 1. Check for duplicate case
 router.get("/check-duplicate", async (req, res) => {
   const { patientName, phoneNumber, visitDate } = req.query;
   try {
     const existing = await Case.findOne({ patientName, phoneNumber, visitDate });
     res.json({ exists: !!existing });
   } catch (err) {
-    console.error("Error checking duplicate case:", err);
+    console.error("❌ Error checking duplicate case:", err);
     res.status(500).json({ error: "Server error while checking duplicate." });
   }
 });
-//✅ 1. Get today's follow-up reminders
+
+// ✅ 2. Get today's follow-up reminders
 router.get('/followups/today', async (req, res) => {
   try {
     const today = new Date();
@@ -35,7 +36,7 @@ router.get('/followups/today', async (req, res) => {
   }
 });
 
-// ✅ 2. Create a new case
+// ✅ 3. Create a new case
 router.post('/', async (req, res) => {
   try {
     const {
@@ -63,6 +64,10 @@ router.post('/', async (req, res) => {
     });
 
     await newCase.save();
+
+    console.log('✅ New Case Submitted:');
+    console.log(JSON.stringify(req.body, null, 2)); // Log the full case
+
     res.status(201).json({ message: 'Case saved successfully', data: newCase });
   } catch (err) {
     console.error('❌ Error saving case:', err);
@@ -70,7 +75,7 @@ router.post('/', async (req, res) => {
   }
 });
 
-// ✅ 3. Get all cases
+// ✅ 4. Get all cases
 router.get('/', async (req, res) => {
   try {
     const cases = await Case.find().sort({ visitDate: -1 });
@@ -81,7 +86,7 @@ router.get('/', async (req, res) => {
   }
 });
 
-// ✅ 4. Delete a case by ID
+// ✅ 5. Delete a case by ID
 router.delete('/:id', async (req, res) => {
   try {
     const deletedCase = await Case.findByIdAndDelete(req.params.id);
@@ -95,7 +100,7 @@ router.delete('/:id', async (req, res) => {
   }
 });
 
-// ✅ 5. Update a case by ID
+// ✅ 6. Update a case by ID
 router.put('/:id', async (req, res) => {
   try {
     const updatedCase = await Case.findByIdAndUpdate(req.params.id, req.body, {
@@ -114,7 +119,7 @@ router.put('/:id', async (req, res) => {
   }
 });
 
-// ✅ 6. Add a follow-up to a case
+// ✅ 7. Add a follow-up to a case
 router.post('/:id/followups', async (req, res) => {
   try {
     const { date, notes } = req.body;
@@ -132,7 +137,7 @@ router.post('/:id/followups', async (req, res) => {
   }
 });
 
-// ✅ 7. Get a single case by ID
+// ✅ 8. Get a single case by ID
 router.get('/:id', async (req, res) => {
   try {
     const caseData = await Case.findById(req.params.id);

@@ -15,8 +15,16 @@ dotenv.config();
 const app = express();
 const port = process.env.PORT || 10000;
 
+// CORS options to allow your frontend domain
+const corsOptions = {
+  origin: 'https://bhanu-homeo-frontend.onrender.com', // మీ ఫ్రంటెండ్ డొమైన్
+  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE', // మీరు ఉపయోగించే HTTP మెథడ్‌లు
+  credentials: true, // అవసరమైతే కుకీలు/హెడర్‌లను అనుమతించడానికి
+  allowedHeaders: 'Content-Type, Authorization', // మీరు ఉపయోగించే హెడర్‌లు
+};
+
 // Middleware setup
-app.use(cors());
+app.use(cors(corsOptions)); // కాన్ఫిగర్ చేసిన CORS ఆప్షన్‌లను ఉపయోగించండి
 app.use(bodyParser.json());
 
 // Multer setup for image uploads

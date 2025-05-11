@@ -17,23 +17,23 @@ const port = process.env.PORT || 10000;
 
 // CORS options to allow your frontend domain
 const corsOptions = {
-  origin: 'https://bhanu-homeo-frontend.onrender.com', // మీ ఫ్రంటెండ్ డొమైన్
-  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE', // మీరు ఉపయోగించే HTTP మెథడ్‌లు
-  credentials: true, // అవసరమైతే కుకీలు/హెడర్‌లను అనుమతించడానికి
-  allowedHeaders: 'Content-Type, Authorization', // మీరు ఉపయోగించే హెడర్‌లు
+  origin: 'https://bhanu-homeo-frontend.onrender.com', // Frontend domain
+  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE', // Allowed HTTP methods
+  credentials: true, // Allow cookies/headers if needed
+  allowedHeaders: 'Content-Type, Authorization', // Allowed headers
 };
 
 // Middleware setup
-app.use(cors(corsOptions)); // కాన్ఫిగర్ చేసిన CORS ఆప్షన్‌లను ఉపయోగించండి
-app.use(bodyParser.json());
+app.use(cors(corsOptions)); // Use the configured CORS options
+app.use(bodyParser.json()); // Parse incoming JSON requests
 
 // Multer setup for image uploads
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, 'uploads/'); // Saves the file to 'uploads' folder
+    cb(null, 'uploads/'); // Save the file to 'uploads' folder
   },
   filename: (req, file, cb) => {
-    cb(null, Date.now() + path.extname(file.originalname)); // Save with unique name
+    cb(null, Date.now() + path.extname(file.originalname)); // Save with a unique name
   }
 });
 

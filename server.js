@@ -9,6 +9,7 @@ const path = require('path');
 const fs = require('fs');
 const tf = require('@tensorflow/tfjs-node');
 const blazeface = require('@tensorflow-models/blazeface');
+const { Configuration, OpenAIApi } = require('openai');
 
 dotenv.config();
 
@@ -80,6 +81,49 @@ app.post('/analyze-image', upload.single('image'), async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).send('Error during image analysis.');
+  }
+});
+
+// ------------------------------
+// 🧠 AI Case Analysis Endpoint
+// ------------------------------
+const configuration = new Configuration({
+  apiKey: process.env.OPENAI_API_KEY,
+});
+const openai = new OpenAIApi(configuration);
+
+app.post('/api/analyze-case', async (req, res) => {
+  try {
+    const { name, age, gender, symptoms, mindRubrics, imageBase64 } = req.body;
+
+    const prompt = `
+You are a top homeopathy expert. A patient case is submitted:
+
+Name: ${name}
+Age: ${age}
+Gender: ${gender}
+Symptoms: ${symptoms}
+Mind Rubrics: ${mindRubrics}
+
+Based on this case, provide:
+1. Best remedy with reason
+2. Miasmatic interpretation
+3. Constitutional logic
+4. Repertory logic
+5. Materia Medica match
+6. 2-3 similar remedies with reasons
+`;
+
+    const completion = await openai.createChatCompletion({
+      model: "gpt-4",
+      messages: [{ role: "user", content: prompt }],
+    });
+
+    const analysis = completion.data.choices[0].message.content;
+    res.json({ success: true, analysis });
+  } catch (error) {
+    console.error('AI Error:', error.message);
+    res.status(500).json({ success: false, error: 'AI analysis failed' });
   }
 });
 

@@ -80,7 +80,7 @@ app.post('/analyze-image', upload.single('image'), async (req, res) => {
     fs.unlinkSync(imagePath); // delete after processing
     res.json({ message: 'Analysis completed', predictions });
   } catch (error) {
-    console.error(error);
+    console.error('Image Analysis Error:', error);
     res.status(500).send('Error during image analysis.');
   }
 });
@@ -115,14 +115,20 @@ Based on this case, provide:
 `;
 
     const completion = await openai.chat.completions.create({
-      model: "gpt-3.5-turbo",  // ✅ Updated model
+      model: "gpt-3.5-turbo", // ✅ Compatible, reliable
       messages: [{ role: "user", content: prompt }],
     });
 
-    const analysis = completion.choices[0].message.content;
-    res.json({ success: true, analysis });
+    if (completion.choices && completion.choices.length > 0 && completion.choices[0].message) {
+      const analysis = completion.choices[0].message.content;
+      res.json({ success: true, analysis });
+    } else {
+      console.error("AI Error: No valid response from OpenAI");
+      res.status(500).json({ success: false, error: "AI analysis failed: No valid response" });
+    }
+
   } catch (error) {
-    console.error('AI Error:', error.message);
+    console.error('AI Error:', error);
     res.status(500).json({ success: false, error: 'AI analysis failed' });
   }
 });

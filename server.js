@@ -9,7 +9,7 @@ const path = require('path');
 const fs = require('fs');
 const tf = require('@tensorflow/tfjs-node');
 const blazeface = require('@tensorflow-models/blazeface');
-const { Configuration, OpenAIApi } = require('openai');
+const OpenAI = require('openai'); // ✅ Correct import for v4
 
 dotenv.config();
 
@@ -87,10 +87,11 @@ app.post('/analyze-image', upload.single('image'), async (req, res) => {
 // ------------------------------
 // 🧠 AI Case Analysis Endpoint
 // ------------------------------
-const configuration = new Configuration({
+
+// ✅ Proper OpenAI v4 client initialization
+const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
-const openai = new OpenAIApi(configuration);
 
 app.post('/api/analyze-case', async (req, res) => {
   try {
@@ -114,12 +115,12 @@ Based on this case, provide:
 6. 2-3 similar remedies with reasons
 `;
 
-    const completion = await openai.createChatCompletion({
+    const completion = await openai.chat.completions.create({
       model: "gpt-4",
       messages: [{ role: "user", content: prompt }],
     });
 
-    const analysis = completion.data.choices[0].message.content;
+    const analysis = completion.choices[0].message.content;
     res.json({ success: true, analysis });
   } catch (error) {
     console.error('AI Error:', error.message);

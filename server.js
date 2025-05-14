@@ -11,15 +11,11 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// ✅ Proper CORS configuration for production
-const corsOptions = {
+// ✅ Allow requests from frontend domain
+app.use(cors({
   origin: "https://bhanu-homeo-frontend.onrender.com",
-  methods: ["GET", "POST", "PUT", "DELETE"],
-  credentials: true,
-};
-app.use(cors(corsOptions));
+}));
 
-// ✅ Middleware
 app.use(express.json());
 
 // ✅ MongoDB Connection
@@ -42,7 +38,7 @@ const caseSchema = new mongoose.Schema({
   physical: String,
   imageUrl: String,
   date: Date,
-  followUps: [Object], // Multiple follow-ups support
+  followUps: [Object],
 });
 
 const Case = mongoose.model("Case", caseSchema);
@@ -54,7 +50,7 @@ app.post("/submit-case", async (req, res) => {
     await newCase.save();
     res.status(200).send({ message: "Case saved successfully" });
   } catch (err) {
-    console.error("❌ Error saving case:", err);
+    console.error(err);
     res.status(500).send("Error saving case");
   }
 });
@@ -65,52 +61,43 @@ app.get("/cases", async (req, res) => {
     const cases = await Case.find();
     res.send(cases);
   } catch (err) {
-    console.error("❌ Error fetching cases:", err);
+    console.error("Error fetching cases:", err);
     res.status(500).send("Error fetching cases");
   }
 });
 
-// ✅ Remedy Data Endpoint (Static JSON)
+// ✅ Remedy Data Endpoint
 app.get("/remedies", (req, res) => {
   const filePath = path.join(__dirname, "data", "remedies.json");
   try {
     const data = fs.readFileSync(filePath, "utf8");
     res.send(JSON.parse(data));
   } catch (err) {
-    console.error("❌ Error reading remedies:", err);
+    console.error("Error reading remedies:", err);
     res.status(500).send("Error reading remedy data");
   }
 });
 
-// ✅ AI Integration Endpoint
+// ✅ Gemini AI Integration Endpoint
 app.post("/ask-ai", async (req, res) => {
   const { caseData } = req.body;
   try {
-    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+    // Replace the OpenAI API with Gemini AI API endpoint and the appropriate headers
+    const response = await fetch("https://api.gemini.ai/v1/ask", {  // Example Gemini endpoint
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+        Authorization: `Bearer ${process.env.GEMINI_API_KEY}`,  // Use Gemini API key
       },
       body: JSON.stringify({
-        model: "gpt-4",
-        messages: [
-          {
-            role: "system",
-            content: "You are a homeopathy expert. Analyze the case and suggest the best remedy with full explanation.",
-          },
-          {
-            role: "user",
-            content: `Patient case data: ${JSON.stringify(caseData)}`,
-          },
-        ],
+        query: `Analyze the following homeopathy case and suggest the best remedy with a detailed explanation: ${JSON.stringify(caseData)}`,
       }),
     });
 
     const data = await response.json();
-    res.send(data.choices[0].message.content);
+    res.send(data.response);  // Adjust based on Gemini's actual response structure
   } catch (err) {
-    console.error("❌ AI error:", err);
+    console.error("AI error:", err);
     res.status(500).send("Error getting AI response");
   }
 });

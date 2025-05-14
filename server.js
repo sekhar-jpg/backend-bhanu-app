@@ -11,11 +11,15 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// ✅ Allow requests from frontend domain
-app.use(cors({
+// ✅ Proper CORS configuration for production
+const corsOptions = {
   origin: "https://bhanu-homeo-frontend.onrender.com",
-}));
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  credentials: true,
+};
+app.use(cors(corsOptions));
 
+// ✅ Middleware
 app.use(express.json());
 
 // ✅ MongoDB Connection
@@ -38,7 +42,7 @@ const caseSchema = new mongoose.Schema({
   physical: String,
   imageUrl: String,
   date: Date,
-  followUps: [Object],
+  followUps: [Object], // Multiple follow-ups support
 });
 
 const Case = mongoose.model("Case", caseSchema);
@@ -50,7 +54,7 @@ app.post("/submit-case", async (req, res) => {
     await newCase.save();
     res.status(200).send({ message: "Case saved successfully" });
   } catch (err) {
-    console.error(err);
+    console.error("❌ Error saving case:", err);
     res.status(500).send("Error saving case");
   }
 });
@@ -61,19 +65,19 @@ app.get("/cases", async (req, res) => {
     const cases = await Case.find();
     res.send(cases);
   } catch (err) {
-    console.error("Error fetching cases:", err);
+    console.error("❌ Error fetching cases:", err);
     res.status(500).send("Error fetching cases");
   }
 });
 
-// ✅ Remedy Data Endpoint
+// ✅ Remedy Data Endpoint (Static JSON)
 app.get("/remedies", (req, res) => {
   const filePath = path.join(__dirname, "data", "remedies.json");
   try {
     const data = fs.readFileSync(filePath, "utf8");
     res.send(JSON.parse(data));
   } catch (err) {
-    console.error("Error reading remedies:", err);
+    console.error("❌ Error reading remedies:", err);
     res.status(500).send("Error reading remedy data");
   }
 });
@@ -106,7 +110,7 @@ app.post("/ask-ai", async (req, res) => {
     const data = await response.json();
     res.send(data.choices[0].message.content);
   } catch (err) {
-    console.error("AI error:", err);
+    console.error("❌ AI error:", err);
     res.status(500).send("Error getting AI response");
   }
 });

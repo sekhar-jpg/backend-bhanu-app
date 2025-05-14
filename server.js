@@ -11,10 +11,14 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-app.use(cors());
+// ✅ Allow requests from frontend domain
+app.use(cors({
+  origin: "https://bhanu-homeo-frontend.onrender.com",
+}));
+
 app.use(express.json());
 
-// MongoDB Connection
+// ✅ MongoDB Connection
 mongoose
   .connect(process.env.MONGO_URI, {
     useNewUrlParser: true,
@@ -23,7 +27,7 @@ mongoose
   .then(() => console.log("✅ MongoDB connected"))
   .catch((err) => console.error("❌ MongoDB connection error:", err));
 
-// Case Schema
+// ✅ Case Schema
 const caseSchema = new mongoose.Schema({
   name: String,
   age: Number,
@@ -34,12 +38,12 @@ const caseSchema = new mongoose.Schema({
   physical: String,
   imageUrl: String,
   date: Date,
-  followUps: [Object], // Multiple follow-ups
+  followUps: [Object],
 });
 
 const Case = mongoose.model("Case", caseSchema);
 
-// Submit New Case
+// ✅ Submit New Case
 app.post("/submit-case", async (req, res) => {
   try {
     const newCase = new Case(req.body);
@@ -51,13 +55,18 @@ app.post("/submit-case", async (req, res) => {
   }
 });
 
-// Get All Cases
+// ✅ Get All Cases
 app.get("/cases", async (req, res) => {
-  const cases = await Case.find();
-  res.send(cases);
+  try {
+    const cases = await Case.find();
+    res.send(cases);
+  } catch (err) {
+    console.error("Error fetching cases:", err);
+    res.status(500).send("Error fetching cases");
+  }
 });
 
-// Remedy Data Endpoint (Static JSON file)
+// ✅ Remedy Data Endpoint
 app.get("/remedies", (req, res) => {
   const filePath = path.join(__dirname, "data", "remedies.json");
   try {
@@ -69,7 +78,7 @@ app.get("/remedies", (req, res) => {
   }
 });
 
-// AI Integration Endpoint
+// ✅ AI Integration Endpoint
 app.post("/ask-ai", async (req, res) => {
   const { caseData } = req.body;
   try {
@@ -102,6 +111,7 @@ app.post("/ask-ai", async (req, res) => {
   }
 });
 
+// ✅ Start Server
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
 });

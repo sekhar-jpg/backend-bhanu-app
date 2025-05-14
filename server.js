@@ -13,7 +13,9 @@ const PORT = process.env.PORT || 5000;
 
 // ✅ Allow requests from frontend domain
 app.use(cors({
-  origin: "https://bhanu-homeo-frontend.onrender.com",
+  origin: "https://bhanu-homeo-frontend.onrender.com",  // Make sure this matches the frontend URL exactly
+  methods: ["GET", "POST", "PUT", "DELETE"],           // Allowing common methods
+  allowedHeaders: ["Content-Type", "Authorization"],   // Allow necessary headers
 }));
 
 app.use(express.json());
@@ -82,8 +84,7 @@ app.get("/remedies", (req, res) => {
 app.post("/ask-ai", async (req, res) => {
   const { caseData } = req.body;
   try {
-    // Replace the OpenAI API with Gemini AI API endpoint and the appropriate headers
-    const response = await fetch("https://api.gemini.ai/v1/ask", {  // Example Gemini endpoint
+    const response = await fetch("https://api.gemini.ai/v1/ask", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

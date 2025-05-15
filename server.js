@@ -15,19 +15,22 @@ const PORT = process.env.PORT || 5000;
 // ✅ Enable CORS for your frontend
 app.use(
   cors({
-    origin: "https://bhanu-homeo-frontend.onrender.com",
+    origin: "https://bhanu-homeo-frontend.onrender.com", // your frontend URL
     methods: ["GET", "POST", "PUT", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
 
-// ✅ Parse application/json
+// ✅ Parse JSON body
 app.use(express.json());
 
-// ✅ Multer setup for file uploads
+// ✅ Static files for uploaded images
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+
+// ✅ Multer setup for image uploads
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, "uploads/"); // Make sure this folder exists
+    cb(null, "uploads/"); // Folder must exist in root
   },
   filename: function (req, file, cb) {
     const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
@@ -36,7 +39,7 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage });
 
-// ✅ MongoDB connection
+// ✅ MongoDB Connection
 mongoose
   .connect(process.env.MONGO_URI, {
     useNewUrlParser: true,
@@ -45,7 +48,7 @@ mongoose
   .then(() => console.log("✅ MongoDB connected"))
   .catch((err) => console.error("❌ MongoDB connection error:", err));
 
-// ✅ Case schema
+// ✅ Mongoose Schema & Model
 const caseSchema = new mongoose.Schema({
   name: String,
   age: Number,
@@ -58,12 +61,28 @@ const caseSchema = new mongoose.Schema({
   date: Date,
   followUps: [Object],
 });
+
 const Case = mongoose.model("Case", caseSchema);
 
-// ✅ Submit new case with image
+// ✅ Test Route
+app.get("/test-route", (req, res) => {
+  res.send("✅ Test route is working!");
+});
+
+// ✅ Submit Case (with image)
 app.post("/submit-case", upload.single("image"), async (req, res) => {
   try {
-    const { name, age, phone, symptoms, mind, modality, physical, date, followUps } = req.body;
+    const {
+      name,
+      age,
+      phone,
+      symptoms,
+      mind,
+      modality,
+      physical,
+      date,
+      followUps,
+    } = req.body;
 
     const imageUrl = req.file ? `/uploads/${req.file.filename}` : "";
 
@@ -81,40 +100,37 @@ app.post("/submit-case", upload.single("image"), async (req, res) => {
     });
 
     await newCase.save();
-    res.status(200).send({ message: "Case saved successfully" });
+    res.status(200).send({ message: "✅ Case saved successfully" });
   } catch (err) {
-    console.error("Error saving case:", err);
-    res.status(500).send("Error saving case");
+    console.error("❌ Error saving case:", err);
+    res.status(500).send("❌ Error saving case");
   }
 });
 
-// ✅ Get all cases
+// ✅ Get All Cases
 app.get("/cases", async (req, res) => {
   try {
     const cases = await Case.find();
     res.send(cases);
   } catch (err) {
-    console.error("Error fetching cases:", err);
-    res.status(500).send("Error fetching cases");
+    console.error("❌ Error fetching cases:", err);
+    res.status(500).send("❌ Error fetching cases");
   }
 });
 
-// ✅ Static files for uploaded images
-app.use("/uploads", express.static(path.join(__dirname, "uploads")));
-
-// ✅ Remedy data endpoint
+// ✅ Remedies JSON Endpoint
 app.get("/remedies", (req, res) => {
   const filePath = path.join(__dirname, "data", "remedies.json");
   try {
     const data = fs.readFileSync(filePath, "utf8");
     res.send(JSON.parse(data));
   } catch (err) {
-    console.error("Error reading remedies:", err);
-    res.status(500).send("Error reading remedy data");
+    console.error("❌ Error reading remedies:", err);
+    res.status(500).send("❌ Error reading remedy data");
   }
 });
 
-// ✅ Gemini AI integration
+// ✅ Gemini AI Integration
 app.post("/ask-ai", async (req, res) => {
   const { caseData } = req.body;
   try {
@@ -125,19 +141,21 @@ app.post("/ask-ai", async (req, res) => {
         Authorization: `Bearer ${process.env.GEMINI_API_KEY}`,
       },
       body: JSON.stringify({
-        query: `Analyze the following homeopathy case and suggest the best remedy with a detailed explanation: ${JSON.stringify(caseData)}`,
+        query: `Analyze the following homeopathy case and suggest the best remedy with a detailed explanation: ${JSON.stringify(
+          caseData
+        )}`,
       }),
     });
 
     const data = await response.json();
     res.send(data.response);
   } catch (err) {
-    console.error("AI error:", err);
-    res.status(500).send("Error getting AI response");
+    console.error("❌ AI error:", err);
+    res.status(500).send("❌ Error getting AI response");
   }
 });
 
-// ✅ Start server
+// ✅ Start the server
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
 });
